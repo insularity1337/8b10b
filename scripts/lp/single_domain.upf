@@ -1,0 +1,35 @@
+upf_version 3.1
+
+set_design_top pa_env
+
+set_scope .
+
+create_supply_port VDD
+create_supply_port VSS
+
+create_supply_net VDD
+create_supply_net VSS
+
+connect_supply_net VDD -ports {VDD}
+connect_supply_net VSS -ports {VSS}
+
+create_supply_set top_supply_set \
+  -function {power VDD} \
+  -function {ground VSS}
+
+create_power_domain top_pd \
+  -elements {.}
+
+associate_supply_set top_supply_set -handle top_pd.primary
+
+add_power_state \
+  -supply top_pd.primary \
+  -state {ON \
+    -supply_expr {power == {FULL_ON, 3.3} && ground == {FULL_ON, 0}} \
+    -simstate NORMAL} \
+  -state {OFF \
+    -supply_expr {power == OFF && ground == {FULL_ON, 0}} \
+    -simstate NORMAL} \
+  -state {FOO \
+    -supply_expr {power == OFF && ground == OFF} \
+    -simstate NORMAL}

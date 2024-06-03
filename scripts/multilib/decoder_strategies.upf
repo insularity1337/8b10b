@@ -1,0 +1,26 @@
+set_isolation dec2env_iso \
+  -domain dec/aon_power_domain \
+  -source dec/ps_power_domain.primary \
+  -sink dec/aon_power_domain.primary \
+  -diff_supply_only FALSE \
+  -applies_to inputs \
+  -location self \
+  -clamp_value 0 \
+  -isolation_signal DEC_ISO \
+  -isolation_sense low \
+  -isolation_supply dec/aon_power_domain.primary
+
+set_level_shifter dec2env_lsh \
+  -domain always_on_power_domain \
+  -source dec/aon_power_domain.primary \
+  -sink always_on_power_domain.primary \
+  -applies_to inputs \
+  -rule low_to_high \
+  -location self
+
+set_retention dec_state_ret \
+  -domain dec/ps_power_domain \
+  -elements dec/decoder_core/rd \
+  -save_signal {DEC_RET low} \
+  -restore_signal {DEC_RET high} \
+  -retention_supply dec/aon_power_domain.primary

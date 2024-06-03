@@ -1,0 +1,148 @@
+upf_version 3.1
+
+set_design_top pa_env
+
+set_scope .
+
+create_supply_port VSS
+
+# Environment supply
+# {1.6 V, 1.95 V} - ok
+create_supply_port VDD_AON
+create_supply_net  VDD_AON
+connect_supply_net VDD_AON -ports {VDD_AON}
+
+create_supply_set always_on_supply_set \
+  -function {power VDD_AON} \
+  -function {ground VSS}
+
+# pa_env power domain (always-on)
+create_power_domain always_on_power_domain \
+  -elements {.}
+
+associate_supply_set always_on_supply_set \
+  -handle always_on_power_domain.primary
+
+add_power_state \
+  -supply always_on_power_domain.primary \
+  -state {VNOM \
+    -supply_expr {power == {FULL_ON, 1.6} && ground == {FULL_ON, 0}} \
+    -simstate NORMAL} \
+  -state {VBOOST \
+    -supply_expr {power == {FULL_ON, 1.95} && ground == {FULL_ON, 0}} \
+    -simstate NORMAL} \
+  -complete
+
+# 
+# Encoder VDD
+# 
+create_supply_port EVDD
+
+set_scope ./enc
+create_supply_port VDD
+create_supply_port VSS
+
+set_scope ../
+create_supply_net EVDD
+connect_supply_net EVDD -ports {EVDD enc/VDD}
+
+# 
+# Decoder VDD
+#
+create_supply_port DVDD
+
+set_scope ./dec
+create_supply_port VDD
+create_supply_port VSS
+
+set_scope ../
+create_supply_net DVDD
+connect_supply_net DVDD -ports {DVDD dec/VDD}
+
+# 
+# Common
+# 
+create_supply_net VSS
+connect_supply_net VSS  -ports {VSS enc/VSS dec/VSS}
+
+#
+# Encoder power switch control
+#
+set_scope ./enc
+create_logic_port PS_CTRL
+
+set_scope ../
+create_logic_net ENC_PS_CTRL
+connect_logic_net ENC_PS_CTRL -ports {ENC_PS_CTRL enc/PS_CTRL}
+
+#
+# Encoder isolation & retention control ports
+#
+create_logic_port ENC_ISO
+create_logic_port ENC_RET
+
+# 
+# Decoder power switch control
+# 
+set_scope ./dec
+create_logic_port PS_CTRL
+
+set_scope ../
+create_logic_net DEC_PS_CTRL
+connect_logic_net DEC_PS_CTRL -ports {DEC_PS_CTRL dec/PS_CTRL}
+
+#
+# Decoder isolation & retention control ports
+#
+create_logic_port DEC_ISO
+create_logic_port DEC_RET
+
+#
+# Encoder power states
+#
+load_upf \
+  -scope ./enc \
+  ../scripts/lp/encoder_power.upf
+
+#
+# Decoder power states
+#
+load_upf \
+  -scope ./dec \
+  ../scripts/lp/decoder_power.upf
+
+#
+# Environment power group
+#
+create_power_state_group ENV_PWR
+add_power_state \
+  -group ENV_PWR \
+  -state {OFF_VNOM_OFF         -logic_expr {(enc/ENC_PWR == VNOM_OFF)   && (always_on_supply_set == VNOM)   && (dec/DEC_PWR == VNOM_OFF)  }} \
+  -state {VNOM_VNOM_OFF        -logic_expr {(enc/ENC_PWR == VNOM)       && (always_on_supply_set == VNOM)   && (dec/DEC_PWR == VNOM_OFF)  }} \
+  -state {OFF_VNOM_VNOM        -logic_expr {(enc/ENC_PWR == VNOM_OFF)   && (always_on_supply_set == VNOM)   && (dec/DEC_PWR == VNOM)      }} \
+  -state {VNOM_VNOM_VNOM       -logic_expr {(enc/ENC_PWR == VNOM)       && (always_on_supply_set == VNOM)   && (dec/DEC_PWR == VNOM)      }} \
+  -state {OFF_VBOOST_OFF       -logic_expr {(enc/ENC_PWR == VBOOST_OFF) && (always_on_supply_set == VBOOST) && (dec/DEC_PWR == VBOOST_OFF)}} \
+  -state {VBOOST_VBOOST_OFF    -logic_expr {(enc/ENC_PWR == VBOOST)     && (always_on_supply_set == VBOOST) && (dec/DEC_PWR == VBOOST_OFF)}} \
+  -state {OFF_VBOOST_VBOOST    -logic_expr {(enc/ENC_PWR == VBOOST_OFF) && (always_on_supply_set == VBOOST) && (dec/DEC_PWR == VBOOST)    }} \
+  -state {VBOOST_VBOOST_VBOOST -logic_expr {(enc/ENC_PWR == VBOOST)     && (always_on_supply_set == VBOOST) && (dec/DEC_PWR == VBOOST)    }} \
+  -complete
+
+#
+# Main level shifting strategy
+#
+# set_level_shifter env2dec_lsh \
+  -domain always_on_power_domain \
+  -source always_on_power_domain.primary \
+  -applies_to outputs \
+  -rule high_to_low \
+  -location self
+
+#
+# Encoder strategies
+#
+load_upf ../scripts/lp/encoder_strategies.upf
+
+#
+# Decoder strategies
+#
+load_upf ../scripts/lp/decoder_strategies.upf
