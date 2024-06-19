@@ -1,8 +1,10 @@
 module encoder_8b10b (
   input              CLK ,
   input              RSTn,
+  input              DVI ,
   input              K   ,
   input        [7:0] DI  ,
+  output logic       DVO ,
   output logic [9:0] DO
 );
 
@@ -12,13 +14,16 @@ module encoder_8b10b (
   logic bal_3b4b;
   logic balby;
 
+  logic [5:0] out_high;
+  logic [3:0] out_low;
+
   encoder_5b6b enc_5b6b (
     .DF (rd      ),
     .K  (K       ),
     .DI (DI[4:0] ),
     .S  (s       ),
     .DE (de_5b6b ),
-    .DO (DO[9:4] ),
+    .DO (out_high),
     .BAL(bal_5b6b)
   );
 
@@ -27,7 +32,7 @@ module encoder_8b10b (
     .S  (s       ),
     .K  (K       ),
     .DI (DI[7:5] ),
-    .DO (DO[3:0] ),
+    .DO (out_low ),
     .BAL(bal_3b4b)
   );
 
@@ -38,7 +43,16 @@ module encoder_8b10b (
   always_ff @(negedge RSTn, posedge CLK)
     if (!RSTn)
       rd <= 1'b0;
-    else
+    else if (DVI)
       rd <= balby ~^ rd;
+
+  always_ff @(negedge RSTn, posedge CLK)
+    if (!RSTn) begin
+      DVO <= 1'b0;
+      DO <= 10'd0;
+    end else begin
+      DVO <= DVI;
+      DO <= {out_high, out_low};
+    end
 
 endmodule
