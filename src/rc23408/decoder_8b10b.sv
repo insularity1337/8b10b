@@ -1,8 +1,10 @@
 module decoder_8b10b (
-  input              DF  ,
+  input              CLK ,
+  input              RSTn,
+  input              DVI ,
   input        [9:0] DI  ,
+  output logic       DVO ,
   output logic       K   ,
-  output logic       DE  ,
   output logic [7:0] DO  ,
   output logic       VIOL
 );
@@ -32,6 +34,8 @@ module decoder_8b10b (
   logic [13:0] false;
 
   logic a_false, b_false, c_false, d_false, e_false, f_false, g_false, h_false, k_false;
+
+  logic rd;
 
 
 
@@ -118,22 +122,26 @@ module decoder_8b10b (
 
     invby = invr6 | invr4 | vkx7 | dv64;
 
-    dvby = (~DF & (pdrr6 | (pdrr4 & ~ndrr6))) |
-           ( DF & (ndrr6 | (ndrr4 & ~pdrr6)));
+    dvby = (~rd & (pdrr6 | (pdrr4 & ~ndrr6))) |
+           ( rd & (ndrr6 | (ndrr4 & ~pdrr6)));
 
     pduby = pdur4            |
             (pdur6 & ~ndur4);
 
     nduby = ndur4            |
             (ndur6 & ~pdur4);
-
-    K = k28 | kx7;
-
-    DE = pduby         |
-         (DF & ~nduby);
-
-    VIOL = dvby | invby;
   end
+
+  always_ff @(posedge CLK) begin
+    K    <= k28  | kx7;
+    VIOL <= dvby | invby;
+  end
+
+  always_ff @(negedge RSTn, posedge CLK)
+    if (!RSTn)
+      rd <= 1'b0;
+    else if (DVI)
+      rd <= pduby | (rd & ~nduby);
 
   always_comb begin : false_table
     false[0] = ~a & b & c & ~d & (e ~^ i);
@@ -193,8 +201,14 @@ module decoder_8b10b (
 
   assign k_false = false[13];
 
-  always_comb begin : output_map
-    DO = {
+  always_ff @(negedge RSTn, posedge CLK)
+    if (!RSTn)
+      DVO <= 1'b0;
+    else
+      DVO <= DVI;
+
+  always_ff @(posedge CLK)
+    DO <= {
       h ^ h_false,
       g ^ g_false,
       f ^ f_false,
@@ -204,6 +218,5 @@ module decoder_8b10b (
       b ^ b_false,
       a ^ a_false
     };
-  end
 
 endmodule
