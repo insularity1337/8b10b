@@ -47,12 +47,12 @@ module encoder_8b10b (
       rd <= balby ~^ rd;
 
   always_ff @(negedge RSTn, posedge CLK)
-    if (!RSTn) begin
+    if (!RSTn)
       DVO <= 1'b0;
-      DO <= 10'd0;
-    end else begin
+    else
       DVO <= DVI;
-      DO <= {out_high, out_low};
-    end
+
+  always_ff @(posedge CLK)
+    DO <= {out_high, out_low};
 
 endmodule
