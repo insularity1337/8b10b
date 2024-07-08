@@ -33,7 +33,15 @@ read_hdl -language sv { \
   pa_env.sv \
 }
 
+read_power_intent \
+  -1801 \
+  -version 3.1 \
+  /home/sasha/Downloads/8b10b/tcl/upf.tcl \
+  -module pa_env
+
 elaborate
+
+apply_power_intent
 
 read_sdc sdc.tcl
 
@@ -53,5 +61,8 @@ set_db \
   [get_db library_domains *decoder_domain]
 
 syn_generic
+
+commit_power_intent
+
 
 syn_map
