@@ -18,12 +18,12 @@ module pa_env (
   logic [9:0] enc_do ;
 
   logic       dv_int  ;
-  logic       r_int   ;
+  logic [9:0] r_int   ;
 
   logic       dv_out  ;
   logic       k_out   ;
   logic       viol_out;
-  logic       r_out   ;
+  logic [7:0] r_out   ;
 
 
 

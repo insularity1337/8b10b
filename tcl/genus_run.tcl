@@ -35,7 +35,7 @@ read_hdl -language sv { \
 
 elaborate
 
-#read_sdc sdc.tcl <- ?
+read_sdc sdc.tcl
 
 set_db \
   [get_db designs *pa_env] \
