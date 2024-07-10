@@ -1,7 +1,7 @@
 xrun \
 	-64bit \
 	-gui \
-	-lps_1801 ../tcl/single_domain.upf \
+	-lps_1801 ../tcl/single_domain_w_switch.upf \
 	-lps_common_option \
 	-lps_dut_top pa_env_tb/dut \
 	-faccess \

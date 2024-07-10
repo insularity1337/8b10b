@@ -1,6 +1,7 @@
 module pa_env (
   input              CLK ,
   input              RSTn,
+  input              PS_CTRL,
   input              DVI ,
   input              KI  ,
   input        [7:0] DI  ,

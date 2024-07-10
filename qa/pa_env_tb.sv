@@ -12,9 +12,12 @@ module pa_env_tb ();
 	logic [7:0] dout;
 	logic viol;
 
+	logic ps_ctrl;
+
 	pa_env dut (
 		.CLK (clk),
 		.RSTn (rstn),
+		.PS_CTRL (ps_ctrl),
 		.DVI (dvi),
 		.KI (ki),
 		.DI (di),
@@ -43,14 +46,21 @@ module pa_env_tb ();
 	end
 
 	initial begin
-		$supply_off("dut.VDD");
-		$supply_off("dut.VSS");
-		#10us;
 		$supply_on("dut.VDD", 3.3);
 		$supply_on("dut.VSS", 0);
 		#10us;
-		$supply_off("dut.VSS");
-		$supply_off("dut.VDD");
+		ps_ctrl = 1'b0;
+		#10us;
+		ps_ctrl = 1'b1;
+		#20us;
+		ps_ctrl = 1'b0;
+
+		// $supply_off("dut.VDD");
+		// $supply_off("dut.VSS");
+		// #10us;
+		// #10us;
+		// $supply_off("dut.VSS");
+		// $supply_off("dut.VDD");
 	end
 
 
