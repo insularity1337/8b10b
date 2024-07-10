@@ -5,7 +5,7 @@ module pa_env_tb ();
 	logic clk = 1'b0;
 	logic rstn = 1'b0;
 	logic dvi;
-	logic ki;
+	logic ki = 1'b0;
 	logic [7:0] di;
 	logic dvo;
 	logic ko;
@@ -33,9 +33,6 @@ module pa_env_tb ();
 		forever
 			#5 clk = ~clk;
 
-	initial
-		#13 rstn = ~rstn;
-
 	initial begin
 		repeat(10)
 			@(posedge clk);
@@ -51,12 +48,21 @@ module pa_env_tb ();
 		$supply_on("dut.VDD_ENC", 1.8);
 		$supply_on("dut.VDD", 3.3);
 		$supply_on("dut.VSS", 0);
+		#13 rstn = ~rstn;
 		#10us;
 		ps_ctrl = 1'b0;
 		iso_enc = 1'b1;
 		#10us;
 		ps_ctrl = 1'b1;
-		#20us;
+		rstn = ~rstn;
+		#20;
+		rstn = ~rstn;
+		#10us;
+		@(posedge clk);
+		dvi <= 1'b1;
+		@(posedge clk);
+		dvi <= 1'b0;
+		#10us;
 		iso_enc = 1'b0;
 		#100ns;
 		ps_ctrl = 1'b0;

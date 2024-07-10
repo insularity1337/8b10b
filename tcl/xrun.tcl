@@ -1,8 +1,11 @@
 xrun \
 	-64bit \
 	-gui \
-	-lps_1801 ../tcl/switch_w_isolation.upf \
+	-lps_1801 ../tcl/level_shifter.upf \
 	-lps_common_option \
+	-lps_dig_lsr \
+	-lps_logfile lps.log \
+	-lps_verbose 5 \
 	-lps_dut_top pa_env_tb/dut \
 	-faccess \
 	+rwc \
