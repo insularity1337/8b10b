@@ -42,10 +42,15 @@ add_power_state \
 #
 # 8b/10b encoder power domain
 #
+create_supply_port VDD_ENC
+
+create_supply_net  VDD_ENC
+connect_supply_net VDD_ENC -ports {VDD_ENC}
+
 create_supply_net VDD_PS
 
 create_power_switch encoder_power_switch \
-  -input_supply_port {VDD_I VDD} \
+  -input_supply_port {VDD_I VDD_ENC} \
   -output_supply_port {VDD_O VDD_PS} \
   -control_port {CTRL PS_CTRL} \
   -on_state {ON VDD_I {CTRL}} \
@@ -64,7 +69,7 @@ associate_supply_set encoder_supply_set \
 add_power_state \
   -supply encoder_power_domain.primary \
   -state {ON \
-    -supply_expr {power == {FULL_ON, 3.3} && ground == {FULL_ON, 0}} \
+    -supply_expr {power == {FULL_ON, 1.8} && ground == {FULL_ON, 0}} \
     -simstate NORMAL} \
   -state {OFF \
     -supply_expr {power == OFF && ground == {FULL_ON, 0}} \
@@ -85,19 +90,10 @@ set_isolation enc2env_iso \
   -diff_supply_only FALSE \
   -applies_to outputs \
   -location self \
-  -clamp_value {Z} \
+  -clamp_value {0} \
   -isolation_signal ISO_ENC \
   -isolation_sense low \
   -isolation_supply always_on_power_domain.primary
 
-set_isolation env2enc_iso \
-  -domain encoder_power_domain \
-  -source {always_on_power_domain.primary} \
-  -sink {encoder_power_domain.primary} \
-  -diff_supply_only FALSE \
-  -applies_to inputs \
-  -location self \
-  -clamp_value {Z} \
-  -isolation_signal ISO_ENC \
-  -isolation_sense low \
-  -isolation_supply always_on_power_domain.primary
+
+

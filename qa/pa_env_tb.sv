@@ -48,6 +48,7 @@ module pa_env_tb ();
 	end
 
 	initial begin
+		$supply_on("dut.VDD_ENC", 1.8);
 		$supply_on("dut.VDD", 3.3);
 		$supply_on("dut.VSS", 0);
 		#10us;
