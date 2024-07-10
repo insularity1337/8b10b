@@ -13,11 +13,13 @@ module pa_env_tb ();
 	logic viol;
 
 	logic ps_ctrl;
+	logic iso_enc;
 
 	pa_env dut (
 		.CLK (clk),
 		.RSTn (rstn),
 		.PS_CTRL (ps_ctrl),
+		.ISO_ENC (iso_enc),
 		.DVI (dvi),
 		.KI (ki),
 		.DI (di),
@@ -50,9 +52,12 @@ module pa_env_tb ();
 		$supply_on("dut.VSS", 0);
 		#10us;
 		ps_ctrl = 1'b0;
+		iso_enc = 1'b1;
 		#10us;
 		ps_ctrl = 1'b1;
 		#20us;
+		iso_enc = 1'b0;
+		#100ns;
 		ps_ctrl = 1'b0;
 
 		// $supply_off("dut.VDD");
