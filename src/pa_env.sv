@@ -3,6 +3,7 @@ module pa_env (
   input              RSTn,
   input              PS_CTRL,
   input              ISO_ENC,
+  input              RET_ENC,
   input              DVI ,
   input              KI  ,
   input        [7:0] DI  ,
@@ -43,6 +44,7 @@ module pa_env (
   encoder_8b10b enc (
     .CLK (CLK    ),
     .RSTn(RSTn   ),
+    .RET (RET_ENC),
     .DVI (dv_in  ),
     .K   (k_in   ),
     .DI  (r_in   ),

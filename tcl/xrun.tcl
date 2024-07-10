@@ -1,7 +1,7 @@
 xrun \
 	-64bit \
 	-gui \
-	-lps_1801 ../tcl/level_shifter.upf \
+	-lps_1801 ../tcl/retention.upf \
 	-lps_common_option \
 	-lps_dig_lsr \
 	-lps_logfile lps.log \

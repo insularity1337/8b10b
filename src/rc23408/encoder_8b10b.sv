@@ -1,6 +1,7 @@
 module encoder_8b10b (
   input              CLK ,
   input              RSTn,
+  input              RET,
   input              DVI ,
   input              K   ,
   input        [7:0] DI  ,

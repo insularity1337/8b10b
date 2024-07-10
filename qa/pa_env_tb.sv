@@ -14,12 +14,14 @@ module pa_env_tb ();
 
 	logic ps_ctrl;
 	logic iso_enc;
+	logic ret_enc = 1'b0;
 
 	pa_env dut (
 		.CLK (clk),
 		.RSTn (rstn),
 		.PS_CTRL (ps_ctrl),
 		.ISO_ENC (iso_enc),
+		.RET_ENC(ret_enc),
 		.DVI (dvi),
 		.KI (ki),
 		.DI (di),
@@ -63,9 +65,17 @@ module pa_env_tb ();
 		@(posedge clk);
 		dvi <= 1'b0;
 		#10us;
+		ret_enc = 1'b1;
+		#100ns;
 		iso_enc = 1'b0;
 		#100ns;
 		ps_ctrl = 1'b0;
+		#10us;
+		ps_ctrl = 1'b1;
+		#100ns;
+		ret_enc = 1'b0;
+		#100ns;
+		iso_enc = 1'b1;
 
 		// $supply_off("dut.VDD");
 		// $supply_off("dut.VSS");
