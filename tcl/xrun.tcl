@@ -1,14 +1,30 @@
 xrun \
 	-64bit \
 	-gui \
-	-lps_1801 ../tcl/retention.upf \
-	-lps_common_option \
-	-lps_dig_lsr \
-	-lps_logfile lps.log \
-	-lps_verbose 5 \
-	-lps_dut_top pa_env_tb/dut \
 	-faccess \
 	+rwc \
+	-lps_dut_top pa_env_tb/dut \
+	-lps_xprop \
+	-lps_verbose 5 \
+	-lps_common_options \
+	-lps_corrupt_time0 \
+	-lps_dig_lsr \
+	-lps_driver_info_verbose \
+	-lps_iso_bit_verbose \
+	-lps_iso_check_only \
+	-lps_iso_precedence_verbose \
+	-lps_iso_verbose \
+	-lps_isofilter_verbose \
+	-lps_pam_verbose \
+	-lps_pst_verbose \
+	-lps_restore_level \
+	-lps_smartlog_enable \
+	-lps_srfilter_verbose \
+	-lps_srruleopt_warn \
+	-lps_tcl_set_verbose \
+	-lps_viso \
+	-lps_psn_verbose 2 \
+	-lps_1801 ../tcl/top.upf \
 	./pa_env_tb.sv \
 	../src/pa_env.sv \
 	../src/rc23408/decoder_8b10b.sv \

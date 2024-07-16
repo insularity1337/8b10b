@@ -1,9 +1,12 @@
 module pa_env (
   input              CLK ,
   input              RSTn,
-  input              PS_CTRL,
-  input              ISO_ENC,
-  input              RET_ENC,
+  input              ENC_PS_CTRL,
+  input              DEC_PS_CTRL,
+  input              ENC_ISO,
+  input              ENC_RET,
+  input              DEC_ISO,
+  input              DEC_RET,
   input              DVI ,
   input              KI  ,
   input        [7:0] DI  ,
@@ -44,7 +47,7 @@ module pa_env (
   encoder_8b10b enc (
     .CLK (CLK    ),
     .RSTn(RSTn   ),
-    .RET (RET_ENC),
+    .RET (ENC_RET),
     .DVI (dv_in  ),
     .K   (k_in   ),
     .DI  (r_in   ),
@@ -64,6 +67,7 @@ module pa_env (
   decoder_8b10b dec (
     .CLK (CLK     ),
     .RSTn(RSTn    ),
+    .RET (DEC_RET ),
     .DVI (dv_int  ),
     .DI  (r_int   ),
     .DVO (dv_out  ),

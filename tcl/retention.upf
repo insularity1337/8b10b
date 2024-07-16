@@ -1,3 +1,5 @@
+# load_upf - для загрузки файлов
+
 upf_version 3.1
 
 set_design_top pa_env
@@ -77,6 +79,49 @@ add_power_state \
   -state {FOO \
     -supply_expr {power == OFF && ground == OFF} \
     -simstate CORRUPT}
+
+
+
+#
+# Decoder power domain
+#
+# create_supply_port VDD_DEC
+
+# create_supply_net VDD_DEC
+# connect_supply_net VDD_DEC -ports {VDD_DEC}
+
+# create_supply_net VDD_PS_DEC
+
+# create_power_switch decoder_power_switch \
+#   -input_supply_port {VDD_I VDD_DEC} \
+#   -output_supply_port {VDD_O VDD_PS_DEC} \
+#   -control_port {CTRL PS_DEC_CTRL} \
+#   -on_state {ON VDD_I {CTRL}} \
+#   -off_state {OFF {!CTRL}}
+
+# create_supply_set decoder_supply_set \
+#   -fucntion {power VDD_PS_DEC} \
+#   -function {ground VSS}
+
+# create_power_domain decoder_power_domain \
+#   -elements {dec}
+
+# associate_supply_set decoder_supply_set \
+#   -handle decoder_power_domain.primary
+
+# add_power_state \
+#   -supply decoder_power_domain.primary \
+#   -state {ON \
+#     -supply_expr {power == {FULL_ON, 1.4} && ground == {FULL_ON, 0}} \
+#     -simstate NORMAL} \
+#   -state {OFF \
+#     -supply_expr {power == OFF && ground == {FULL_ON, 0}} \
+#     -simstate CORRUPT} \
+#   -state {FOO \
+#     -supply_expr {power == OFF && ground == OFF} \
+#     -simstate CORRUPT}
+
+
 
 
 

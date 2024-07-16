@@ -1,6 +1,7 @@
 module decoder_8b10b (
   input              CLK ,
   input              RSTn,
+  input              RET ,
   input              DVI ,
   input        [9:0] DI  ,
   output logic       DVO ,
