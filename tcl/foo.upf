@@ -1,0 +1,130 @@
+upf_version 3.1
+
+set_design_top pa_env
+
+set_scope .
+
+create_supply_port VSS
+
+# Environment supply
+# {3.3 V, 5 V} - ok
+create_supply_port VDD_AON
+create_supply_net  VDD_AON
+connect_supply_net VDD_AON -ports {VDD_AON}
+
+create_supply_set always_on_supply_set \
+  -function {power VDD_AON} \
+  -function {ground VSS}
+
+# pa_env power domain (always-on)
+create_power_domain always_on_power_domain \
+  -elements {.}
+
+associate_supply_set always_on_supply_set \
+  -handle always_on_power_domain.primary
+
+add_power_state \
+  -supply always_on_power_domain.primary \
+  -state {ON \
+    -supply_expr {power == {FULL_ON, 3.3} && ground == {FULL_ON, 0}} \
+    -simstate NORMAL} 
+
+
+
+
+
+# Decoder always-on power supply
+create_supply_port DVDD
+
+set_scope ./dec
+
+create_supply_port VDD
+create_supply_port VSS
+
+set_scope ../
+
+create_supply_net DVDD
+create_supply_net VSS
+
+connect_supply_net DVDD -ports {DVDD dec/VDD}
+connect_supply_net VSS -ports {VSS  dec/VSS}
+
+set_scope ./dec
+
+create_supply_set aon_supply_set \
+  -function {power VDD} \
+  -function {ground VSS}
+
+add_power_state \
+  -supply aon_supply_set \
+  -state {ON \
+    -supply_expr {power == {FULL_ON, 1.6} && ground == {FULL_ON, 0}} \
+    -simstate NORMAL} 
+
+create_supply_set ps_supply_set \
+  -function {ground VSS}
+
+create_logic_port PS_CTRL
+set_scope ../
+create_logic_net DEC_PS_CTRL
+connect_logic_net DEC_PS_CTRL -ports {DEC_PS_CTRL dec/PS_CTRL}
+set_scope ./dec
+
+create_power_switch ps \
+  -input_supply_port {IVDD aon_supply_set.power} \
+  -output_supply_port {OVDD ps_supply_set.power} \
+  -control_ports {CTRL PS_CTRL} \
+  -on_state {ON IVDD {CTRL}} \
+  -off_state {OFF {!CTRL}}
+
+add_power_state \
+  -supply ps_supply_set \
+  -state {ON \
+    -supply_expr {power == {FULL_ON, 1.6} && ground == {FULL_ON, 0}} \
+    -simstate NORMAL} \
+  -state {OFF \
+    -supply_expr {power == OFF && ground == {FULL_ON, 0}} \
+    -simstate CORRUPT}
+
+create_power_domain ps_power_domain \
+  -elements {.} \
+  -supply {primary ps_supply_set} \
+  -supply {retention aon_supply_set}
+
+create_power_domain aon_power_domain \
+  -elements {aon} \
+  -supply {primary aon_supply_set}
+
+set_scope ../
+
+set_isolation dec2env_iso \
+  -domain dec/aon_power_domain \
+  -source dec/ps_power_domain.primary \
+  -sink dec/aon_power_domain.primary \
+  -diff_supply_only FALSE \
+  -applies_to inputs \
+  -location self \
+  -clamp_value 0 \
+  -isolation_signal DEC_ISO \
+  -isolation_sense low \
+  -isolation_supply dec/aon_power_domain.primary
+
+set_level_shifter dec2env_lsh \
+  -domain always_on_power_domain \
+  -source dec/aon_power_domain.primary \
+  -sink always_on_power_domain.primary \
+  -applies_to inputs \
+  -rule low_to_high \
+  -location self
+
+set_level_shifter env2dec_lsh \
+  -domain always_on_power_domain \
+  -source always_on_power_domain.primary \
+  -applies_to outputs \
+  -rule high_to_low \
+  -location self
+
+set_retention enc_state_ret \
+  -domain dec/ps_power_domain \
+  -retention_condition {!DEC_RET} \
+  -retention_supply dec/ps_power_domain.primary
