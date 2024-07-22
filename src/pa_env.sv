@@ -3,10 +3,10 @@ module pa_env (
   input              RSTn,
   input              ENC_PS_CTRL,
   input              DEC_PS_CTRL,
-  input              ENC_ISO,
-  input              ENC_RET,
-  input              DEC_ISO,
-  input              DEC_RET,
+  // input              ENC_ISO,
+  // input              ENC_RET,
+  // input              DEC_ISO,
+  // input              DEC_RET,
   input              DVI ,
   input              KI  ,
   input        [7:0] DI  ,
@@ -39,15 +39,16 @@ module pa_env (
     else
       dv_in <= DVI;
 
-  always_ff @(posedge CLK) begin
-    k_in <= KI;
-    r_in <= DI;
-  end
+  always_ff @(posedge CLK)
+    if (DVI) begin
+      k_in <= KI;
+      r_in <= DI;
+    end
 
-  encoder_8b10b enc (
+  encoder_8b10b_wrapper enc (
     .CLK (CLK    ),
     .RSTn(RSTn   ),
-    .RET (ENC_RET),
+    // .RET (ENC_RET),
     .DVI (dv_in  ),
     .K   (k_in   ),
     .DI  (r_in   ),
@@ -62,12 +63,13 @@ module pa_env (
       dv_int <= enc_dvo;
 
   always_ff @(posedge CLK)
-    r_int <= enc_do;
+    if (enc_dvo)
+      r_int <= enc_do;
 
-  decoder_8b10b dec (
+  decoder_8b10b_wrapper dec (
     .CLK (CLK     ),
     .RSTn(RSTn    ),
-    .RET (DEC_RET ),
+    // .RET (DEC_RET ),
     .DVI (dv_int  ),
     .DI  (r_int   ),
     .DVO (dv_out  ),
@@ -82,10 +84,11 @@ module pa_env (
     else
       DVO <= dv_out;
 
-  always_ff @(posedge CLK) begin
-    KO   <= k_out;
-    VIOL <= viol_out;
-    DO   <= r_out;
-  end
+  always_ff @(posedge CLK)
+    if (dv_out) begin
+      KO   <= k_out;
+      VIOL <= viol_out;
+      DO   <= r_out;
+    end
 
 endmodule

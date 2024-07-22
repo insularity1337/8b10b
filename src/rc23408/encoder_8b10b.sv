@@ -1,7 +1,7 @@
 module encoder_8b10b (
   input              CLK ,
   input              RSTn,
-  input              RET,
+  // input              RET,
   input              DVI ,
   input              K   ,
   input        [7:0] DI  ,
@@ -47,13 +47,20 @@ module encoder_8b10b (
     else if (DVI)
       rd <= balby ~^ rd;
 
-  always_ff @(negedge RSTn, posedge CLK)
-    if (!RSTn)
-      DVO <= 1'b0;
-    else
-      DVO <= DVI;
+  // always_ff @(negedge RSTn, posedge CLK)
+  //   if (!RSTn)
+  //     DVO <= 1'b0;
+  //   else
+  //     DVO <= DVI;
 
-  always_ff @(posedge CLK)
-    DO <= {out_high, out_low};
+  always_comb
+    DVO = 1'b0;
+
+  // always_ff @(posedge CLK)
+  //   if (DVI)
+  //     DO <= {out_high, out_low};
+
+  always_comb
+    DO = {out_high, out_low};
 
 endmodule

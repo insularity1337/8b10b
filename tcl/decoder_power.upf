@@ -1,0 +1,77 @@
+create_supply_set aon_supply_set \
+  -function {power VDD} \
+  -function {ground VSS}
+
+
+
+add_power_state \
+  -supply aon_supply_set \
+  -state {ON_1v6 \
+    -supply_expr {power == {FULL_ON, 1.6} && ground == {FULL_ON, 0}} \
+    -simstate NORMAL} \
+  -state {ON_1v95 \
+    -supply_expr {power == {FULL_ON, 1.95} && ground == {FULL_ON, 0}} \
+    -simstate NORMAL} \
+  -complete
+
+
+
+create_supply_set ps_supply_set \
+  -function {ground VSS}
+
+
+
+create_power_switch ps \
+  -input_supply_port {IVDD aon_supply_set.power} \
+  -output_supply_port {OVDD ps_supply_set.power} \
+  -control_ports {CTRL PS_CTRL} \
+  -on_state {ON IVDD {CTRL}} \
+  -off_state {OFF {!CTRL}}
+
+
+
+add_power_state \
+  -supply ps_supply_set \
+  -state {ON_1v6 \
+    -supply_expr {power == {FULL_ON, 1.6} && ground == {FULL_ON, 0}} \
+    -simstate NORMAL} \
+  -state {ON_1v95 \
+    -supply_expr {power == {FULL_ON, 1.95} && ground == {FULL_ON, 0}} \
+    -simstate NORMAL} \
+  -state {OFF \
+    -supply_expr {power == OFF && ground == {FULL_ON, 0}} \
+    -simstate CORRUPT} \
+  -complete
+
+
+
+add_state_transition \
+  -supply ps_supply_set \
+  -transition {VDWN  -from {ON_1v6 ON_1v95} -to {OFF}                   } \
+  -transition {VUP   -from {OFF}            -to {ON_1v6 ON_1v95}        } \
+  -transition {VJUMP -from {ON_1v6}         -to {ON_1v95}       -illegal} \
+  -transition {VFALL -from {ON_1v95}        -to {ON_1v6}        -illegal}
+
+
+
+create_power_domain aon_power_domain \
+  -elements {.} \
+  -supply {primary aon_supply_set}
+
+
+
+create_power_domain ps_power_domain \
+  -elements {decoder_core} \
+  -supply {primary ps_supply_set} \
+  -supply {retention aon_supply_set}
+
+
+
+create_power_state_group DEC_PWR
+add_power_state \
+  -group DEC_PWR \
+  -state {ON_1v6      -logic_expr {(aon_supply_set == ON_1v6)  && (ps_supply_set == ON_1v6)}} \
+  -state {ON_1v95     -logic_expr {(aon_supply_set == ON_1v95) && (ps_supply_set == ON_1v95)}} \
+  -state {ON_1v6_OFF  -logic_expr {(aon_supply_set == ON_1v6)  && (ps_supply_set == OFF)}} \
+  -state {ON_1v95_OFF -logic_expr {(aon_supply_set == ON_1v95) && (ps_supply_set == OFF)}} \
+  -complete

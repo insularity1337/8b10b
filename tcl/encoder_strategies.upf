@@ -1,0 +1,26 @@
+set_isolation enc2env_iso \
+  -domain enc/aon_power_domain \
+  -source enc/ps_power_domain.primary \
+  -sink enc/aon_power_domain.primary \
+  -diff_supply_only FALSE \
+  -applies_to inputs \
+  -location self \
+  -clamp_value 0 \
+  -isolation_signal ENC_ISO \
+  -isolation_sense low \
+  -isolation_supply enc/aon_power_domain.primary
+
+set_level_shifter enc2env_lsh \
+  -domain always_on_power_domain \
+  -source enc/aon_power_domain.primary \
+  -sink always_on_power_domain.primary \
+  -applies_to inputs \
+  -rule low_to_high \
+  -location self
+
+set_retention enc_state_ret \
+  -domain enc/ps_power_domain \
+  -elements enc/encoder_core/rd \
+  -save_signal {ENC_RET low} \
+  -restore_signal {ENC_RET high} \
+  -retention_supply enc/aon_power_domain.primary

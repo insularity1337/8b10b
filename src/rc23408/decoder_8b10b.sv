@@ -1,7 +1,7 @@
 module decoder_8b10b (
   input              CLK ,
   input              RSTn,
-  input              RET ,
+  // input              RET ,
   input              DVI ,
   input        [9:0] DI  ,
   output logic       DVO ,
@@ -133,9 +133,14 @@ module decoder_8b10b (
             (ndur6 & ~pdur4);
   end
 
-  always_ff @(posedge CLK) begin
-    K    <= k28  | kx7;
-    VIOL <= dvby | invby;
+  // always_ff @(posedge CLK) begin : out_flop_k_viol
+  //   K    <= k28  | kx7;
+  //   VIOL <= dvby | invby;
+  // end
+
+  always_comb begin
+    K    = k28  | kx7;
+    VIOL = dvby | invby;
   end
 
   always_ff @(negedge RSTn, posedge CLK)
@@ -202,14 +207,31 @@ module decoder_8b10b (
 
   assign k_false = false[13];
 
-  always_ff @(negedge RSTn, posedge CLK)
-    if (!RSTn)
-      DVO <= 1'b0;
-    else
-      DVO <= DVI;
+  // always_ff @(negedge RSTn, posedge CLK) begin : out_flop_dvo
+  //   if (!RSTn)
+  //     DVO <= 1'b0;
+  //   else
+  //     DVO <= DVI;
+  // end
 
-  always_ff @(posedge CLK)
-    DO <= {
+  always_comb
+    DVO = 1'b0;
+
+  // always_ff @(posedge CLK) begin : out_flop_do
+  //   DO <= {
+  //     h ^ h_false,
+  //     g ^ g_false,
+  //     f ^ f_false,
+  //     e ^ e_false,
+  //     d ^ d_false,
+  //     c ^ c_false,
+  //     b ^ b_false,
+  //     a ^ a_false
+  //   };
+  // end
+
+  always_comb begin
+    DO = {
       h ^ h_false,
       g ^ g_false,
       f ^ f_false,
@@ -219,5 +241,6 @@ module decoder_8b10b (
       b ^ b_false,
       a ^ a_false
     };
+  end
 
 endmodule

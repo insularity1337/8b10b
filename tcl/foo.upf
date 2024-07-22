@@ -25,98 +25,95 @@ associate_supply_set always_on_supply_set \
 
 add_power_state \
   -supply always_on_power_domain.primary \
-  -state {ON \
+  -state {ON_5v0 \
+    -supply_expr {power == {FULL_ON, 5.0} && ground == {FULL_ON, 0}} \
+    -simstate NORMAL} \
+  -state {ON_3v3 \
     -supply_expr {power == {FULL_ON, 3.3} && ground == {FULL_ON, 0}} \
-    -simstate NORMAL} 
+    -simstate NORMAL} \
+  -complete
 
+# 
+# Encoder VDD
+# 
+create_supply_port EVDD
 
-
-
-
-# Decoder always-on power supply
-create_supply_port DVDD
-
-set_scope ./dec
-
+set_scope ./enc
 create_supply_port VDD
 create_supply_port VSS
 
 set_scope ../
+create_supply_net EVDD
+connect_supply_net EVDD -ports {EVDD enc/VDD}
 
-create_supply_net DVDD
-create_supply_net VSS
-
-connect_supply_net DVDD -ports {DVDD dec/VDD}
-connect_supply_net VSS -ports {VSS  dec/VSS}
+# 
+# Decoder VDD
+#
+create_supply_port DVDD
 
 set_scope ./dec
+create_supply_port VDD
+create_supply_port VSS
 
-create_supply_set aon_supply_set \
-  -function {power VDD} \
-  -function {ground VSS}
+set_scope ../
+create_supply_net DVDD
+connect_supply_net DVDD -ports {DVDD dec/VDD}
 
-add_power_state \
-  -supply aon_supply_set \
-  -state {ON \
-    -supply_expr {power == {FULL_ON, 1.6} && ground == {FULL_ON, 0}} \
-    -simstate NORMAL} 
+# 
+# Common
+# 
+create_supply_net VSS
+connect_supply_net VSS  -ports {VSS enc/VSS dec/VSS}
 
-create_supply_set ps_supply_set \
-  -function {ground VSS}
-
+#
+# Encoder power switch control
+#
+set_scope ./enc
 create_logic_port PS_CTRL
+
+set_scope ../
+create_logic_net ENC_PS_CTRL
+connect_logic_net ENC_PS_CTRL -ports {ENC_PS_CTRL enc/PS_CTRL}
+
+#
+# Encoder isolation & retention control ports
+#
+create_logic_port ENC_ISO
+create_logic_port ENC_RET
+
+# 
+# Decoder power switch control
+# 
+set_scope ./dec
+create_logic_port PS_CTRL
+
 set_scope ../
 create_logic_net DEC_PS_CTRL
 connect_logic_net DEC_PS_CTRL -ports {DEC_PS_CTRL dec/PS_CTRL}
-set_scope ./dec
 
-create_power_switch ps \
-  -input_supply_port {IVDD aon_supply_set.power} \
-  -output_supply_port {OVDD ps_supply_set.power} \
-  -control_ports {CTRL PS_CTRL} \
-  -on_state {ON IVDD {CTRL}} \
-  -off_state {OFF {!CTRL}}
+#
+# Decoder isolation & retention control ports
+#
+create_logic_port DEC_ISO
+create_logic_port DEC_RET
 
-add_power_state \
-  -supply ps_supply_set \
-  -state {ON \
-    -supply_expr {power == {FULL_ON, 1.6} && ground == {FULL_ON, 0}} \
-    -simstate NORMAL} \
-  -state {OFF \
-    -supply_expr {power == OFF && ground == {FULL_ON, 0}} \
-    -simstate CORRUPT}
+#
+# Encoder power states
+#
+load_upf \
+  -scope ./enc \
+  /home/sasha/Downloads/8b10b/tcl/encoder_power.upf
 
-create_power_domain ps_power_domain \
-  -elements {.} \
-  -supply {primary ps_supply_set} \
-  -supply {retention aon_supply_set}
+#
+# Decoder power states
+#
+load_upf \
+  -scope ./dec \
+  /home/sasha/Downloads/8b10b/tcl/decoder_power.upf
 
-create_power_domain aon_power_domain \
-  -elements {aon} \
-  -supply {primary aon_supply_set}
-
-set_scope ../
-
-set_isolation dec2env_iso \
-  -domain dec/aon_power_domain \
-  -source dec/ps_power_domain.primary \
-  -sink dec/aon_power_domain.primary \
-  -diff_supply_only FALSE \
-  -applies_to inputs \
-  -location self \
-  -clamp_value 0 \
-  -isolation_signal DEC_ISO \
-  -isolation_sense low \
-  -isolation_supply dec/aon_power_domain.primary
-
-set_level_shifter dec2env_lsh \
-  -domain always_on_power_domain \
-  -source dec/aon_power_domain.primary \
-  -sink always_on_power_domain.primary \
-  -applies_to inputs \
-  -rule low_to_high \
-  -location self
-
+#
+# Main level shifting strategy
+#
 set_level_shifter env2dec_lsh \
   -domain always_on_power_domain \
   -source always_on_power_domain.primary \
@@ -124,7 +121,12 @@ set_level_shifter env2dec_lsh \
   -rule high_to_low \
   -location self
 
-set_retention enc_state_ret \
-  -domain dec/ps_power_domain \
-  -retention_condition {!DEC_RET} \
-  -retention_supply dec/ps_power_domain.primary
+#
+# Encoder strategies
+#
+load_upf /home/sasha/Downloads/8b10b/tcl/encoder_strategies.upf
+
+#
+# Decoder strategies
+#
+load_upf /home/sasha/Downloads/8b10b/tcl/decoder_strategies.upf

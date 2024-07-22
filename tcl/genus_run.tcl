@@ -1,45 +1,109 @@
+# -1. Составить список условий окружающей среды и добавить, если потребуется, voltage scaling
+#
+#
+# [+] 0. Поправить вставку clock gating ячеек
+# [+] 1. Собрать всё окружение в hvl
+# [+] 2. Проверить вставку преобразователей уровня
+#
+# 3. Добавить lp библиотеку в синтез
+# 4. Проверить вставку ячеек изоляции
+# 5. Проверить вставку триггеров с сохранением состояния
+#
+# [+] 6. Добавить ls библиотеку в синтез
+# [+] 7. Проверить что в нужной области будут вставлены ls ячейки
+#
+# [+] 7.1 Попытаться убрать избыточные порты
+# [+] 7.2 Добавить таблицы переходов
+# [+] 7.3 Добавить общую таблицу состояний
+# [+] 7.4 Добавить общую таблицу переходов
+#
+#
+#
+# 8. Интегрировать simple ple flow в синтез
+#
+# 9. Интегрировать mmmc в синтез
+#
+
 set_db init_lib_search_path /home/sasha/Downloads/skywater-pdk/libraries
 set_db script_search_path   /home/sasha/Downloads/8b10b/tcl
 set_db init_hdl_search_path /home/sasha/Downloads/8b10b/src
 
-set high_voltage_slow { \
+set_db information_level 11
+set_db lp_insert_clock_gating true
+set_db lp_insert_discrete_clock_gating_logic true
+
+
+# zero balanced level shifter cells (asymmetric rise and fall delays)
+set hvl { \
   sky130_fd_sc_hvl/latest/timing/sky130_fd_sc_hvl__ss_100C_3v00.lib \
   sky130_fd_sc_hvl/latest/timing/sky130_fd_sc_hvl__ss_100C_3v00_lowhv1v65_lv1v60.lib \
 }
 
-set low_speed_slow { \
+set ls { \
   sky130_fd_sc_ls/latest/timing/sky130_fd_sc_ls__ss_100C_1v60.lib \
 }
 
-set low_power_slow { \
+set lp { \
   sky130_fd_sc_lp/latest/timing/sky130_fd_sc_lp__ss_100C_1v60.lib \
 }
 
 create_library_domain { \
-  top_domain \
-  encoder_domain \
-  decoder_domain \
+  env_domain \
+  enc_domain \
+  dec_domain
 }
 
-set_db [get_db library_domain *top_domain] .library $high_voltage_slow
-set_db [get_db library_domain *encoder_domain] .library $low_speed_slow
-set_db [get_db library_domain *decoder_domain] .library $low_power_slow
+set_db [get_db library_domain *env_domain] .library $hvl
+set_db [get_db library_domain *enc_domain] .library [concat $ls $lp]
+set_db [get_db library_domain *dec_domain] .library $lp
 
-read_hdl -language sv { \
+# Disable non-iso lp cells inside encoder domain
+get_db \
+  lib_cells *lp* \
+  -if {(.library == *enc_domain*) && (.is_isolation_cell == false)} \
+  -foreach {set_db $object .dont_use true}
+
+# Disable srpg lp cells inside encoder domain
+get_db \
+  lib_cells *lp* \
+  -if {(.library == *enc_domain*) && (.is_flop == true)} \
+  -foreach {set_db $object .dont_use false}
+
+get_db \
+  lib_cells *lp* \
+  -if {(.is_isolation_cell == true) && (.dont_touch == true)} \
+  -foreach {set_db "$object" .dont_use false}
+
+read_hdl -sv { \
   ./rc23408/encoder_3b4b.sv \
   ./rc23408/encoder_5b6b.sv \
   ./rc23408/encoder_8b10b.sv \
+  ./rc23408/encoder_8b10b_wrapper.sv \
   ./rc23408/decoder_8b10b.sv \
+  ./rc23408/decoder_8b10b_wrapper.sv \
   pa_env.sv \
 }
 
 read_power_intent \
   -1801 \
   -version 3.1 \
-  /home/sasha/Downloads/8b10b/tcl/upf.tcl \
+  /home/sasha/Downloads/8b10b/tcl/foo.upf \
   -module pa_env
 
 elaborate
+
+set_db \
+  [get_db modules *encoder_8b10b] \
+  .lp_clock_gating_min_flops \
+  1
+
+set_db \
+  [get_db modules *decoder_8b10b] \
+  .lp_clock_gating_min_flops \
+  1
+
+# set_db [get_db hinsts *encoder_core] .ungroup_ok false
+# set_db [get_db hinsts *decoder_core] .ungroup_ok false
 
 apply_power_intent
 
@@ -48,21 +112,22 @@ read_sdc sdc.tcl
 set_db \
   [get_db designs *pa_env] \
   .library_domain \
-  [get_db library_domains *top_domain]
+  [get_db library_domains *env_domain]
 
 set_db \
-  [get_db modules *encoder_8b10b] \
+  [get_db hinsts *enc] \
   .library_domain \
-  [get_db library_domains *encoder_domain]
+  [get_db library_domains *enc_domain]
 
 set_db \
-  [get_db modules *decoder_8b10b] \
+  [get_db hinsts *dec] \
   .library_domain \
-  [get_db library_domains *decoder_domain]
-
-syn_generic
+  [get_db library_domains *dec_domain]
 
 commit_power_intent
 
+syn_generic
 
 syn_map
+
+check_power_structure -detail > lp.cnfrml
