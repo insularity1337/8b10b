@@ -45,7 +45,7 @@ add_power_state \
 
 
 
-add_state_transition \
+# add_state_transition \
   -supply ps_supply_set \
   -transition {VDWN  -from {VNOM VBOOST} -to {OFF}                 } \
   -transition {VUP   -from {OFF}         -to {VNOM VBOOST}         } \

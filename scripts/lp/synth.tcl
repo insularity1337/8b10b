@@ -1,12 +1,14 @@
-set_db init_lib_search_path /home/sasha/Downloads/skywater-pdk/libraries
-set_db script_search_path   /home/sasha/Downloads/8b10b/tcl
-set_db init_hdl_search_path /home/sasha/Downloads/8b10b/src
+set lib_path [concat $env(SKYWATER_PDK)/libraries]
+
+set_db init_lib_search_path $lib_path
+set_db script_search_path   ../scripts/lp
+set_db init_hdl_search_path ../src
 
 set_db information_level 11
 set_db use_power_ground_pin_from_lef true
 set_db lp_insert_clock_gating true 
 
-read_mmmc /home/sasha/Downloads/8b10b/scripts/lp/mmmc.tcl
+read_mmmc ../scripts/lp/mmmc.tcl
 
 set lp_tech_lef [find [get_db init_lib_search_path]/sky130_fd_sc_lp/ -name "*.tlef"]
 
@@ -24,7 +26,7 @@ read_hdl \
 
 read_power_intent \
   -1801 \
-  /home/sasha/Downloads/8b10b/scripts/lp/top.upf \
+  ../scripts/lp/top.upf \
   -module pa_env
 
 elaborate
@@ -33,7 +35,7 @@ apply_power_intent
 
 source \
   -verbose \
-  /home/sasha/Downloads/8b10b/scripts/lp/floorplan.tcl
+  ../scripts/lp/floorplan.tcl
 
 init_design
 
@@ -59,7 +61,7 @@ syn_map -physical
 
 syn_opt
 
-report_timing \
+# report_timing \
     -fields { \
         "timing_point" \
         "flags" \
@@ -97,10 +99,8 @@ write_reports \
   -directory post_synth_rpt \
   -tag pa_env
 
- write_snapshot \
-  -innovus \
-  -tag post_synth \
-  -directory ./innovus \
-  pa_env
+write_snapshot \
+  -directory ./innovus_import \
+  -innovus -tag post_synth
 
 write_sdf > pa_env.sdf

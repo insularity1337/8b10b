@@ -1,8 +1,8 @@
 upf_version 3.1
 
-set_design_top pa_env
+# set_design_top pa_env
 
-set_scope .
+# set_scope .
 
 create_supply_port VSS
 
@@ -72,6 +72,7 @@ set_scope ./enc
 create_logic_port PS_CTRL
 
 set_scope ../
+create_logic_port ENC_PS_CTRL
 create_logic_net ENC_PS_CTRL
 connect_logic_net ENC_PS_CTRL -ports {ENC_PS_CTRL enc/PS_CTRL}
 
@@ -88,6 +89,7 @@ set_scope ./dec
 create_logic_port PS_CTRL
 
 set_scope ../
+create_logic_port DEC_PS_CTRL
 create_logic_net DEC_PS_CTRL
 connect_logic_net DEC_PS_CTRL -ports {DEC_PS_CTRL dec/PS_CTRL}
 
@@ -100,16 +102,17 @@ create_logic_port DEC_RET
 #
 # Encoder power states
 #
-load_upf \
-  -scope ./enc \
-  /home/sasha/Downloads/8b10b/scripts/multilib/encoder_power.upf
+set_scope ./enc
+load_upf ../scripts/multilib/encoder_power.upf
+set_scope ../
 
 #
 # Decoder power states
 #
+set_scope ./dec
 load_upf \
-  -scope ./dec \
-  /home/sasha/Downloads/8b10b/scripts/multilib/decoder_power.upf
+  ../scripts/multilib/decoder_power.upf
+set_scope ../
 
 #
 # Main level shifting strategy
@@ -124,9 +127,9 @@ set_level_shifter env2dec_lsh \
 #
 # Encoder strategies
 #
-load_upf /home/sasha/Downloads/8b10b/scripts/multilib/encoder_strategies.upf
+load_upf ../scripts/multilib/encoder_strategies.upf
 
 #
 # Decoder strategies
 #
-load_upf /home/sasha/Downloads/8b10b/scripts/multilib/decoder_strategies.upf
+load_upf ../scripts/multilib/decoder_strategies.upf

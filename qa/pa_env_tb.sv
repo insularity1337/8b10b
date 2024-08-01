@@ -2,66 +2,61 @@
 
 module pa_env_tb ();
 
-  logic clk = 1'b0;
-  logic rstn = 1'b0;
-  logic dvi;
-  logic ki = 1'b0;
-  logic [7:0] di;
-  logic dvo;
-  logic ko;
-  logic [7:0] dout;
-  logic viol;
+  logic       clk  = 1'b0;
+  logic       rstn = 1'b0;
+  logic       dvi        ;
+  logic       ki   = 1'b0;
+  logic [7:0] di         ;
+  logic       dvo        ;
+  logic       ko         ;
+  logic [7:0] dout       ;
+  logic       viol       ;
 
-  logic enc_ps_ctrl;
-  logic dec_ps_ctrl;
-  logic enc_iso;
-  logic dec_iso;
-  logic enc_ret = 1'b0;
-  logic dec_ret = 1'b0;
+  logic enc_ps_ctrl       ;
+  logic dec_ps_ctrl       ;
+  logic enc_iso           ;
+  logic dec_iso           ;
+  logic enc_ret     = 1'b0;
+  logic dec_ret     = 1'b0;
 
   pa_env dut (
-    .CLK  (clk),
-    .RSTn (rstn),
-    // Power switch control
-    .ENC_PS_CTRL (enc_ps_ctrl),
-    .DEC_PS_CTRL (dec_ps_ctrl),
-    // Encoder isolation & retention control
-    .ENC_ISO (enc_iso),
-    .ENC_RET (enc_ret),
-    // Decoder isolation & retention control
-    .DEC_ISO (dec_iso),
-    .DEC_RET (dec_ret),
-    // Data ports
-    .DVI  (dvi),
-    .KI   (ki),
-    .DI   (di),
-    .DVO  (dvo),
-    .KO   (ko),
-    .DO   (dout),
-    .VIOL (viol)
+    .CLK (clk ),
+    .RSTn(rstn),
+    .DVI (dvi ),
+    .KI  (ki  ),
+    .DI  (di  ),
+    .DVO (dvo ),
+    .KO  (ko  ),
+    .DO  (dout),
+    .VIOL(viol),
+    .ENC_PS_CTRL(enc_ps_ctrl),
+    .DEC_PS_CTRL(dec_ps_ctrl),
+    .ENC_ISO    (enc_iso    ),
+    .ENC_RET    (enc_ret    ),
+    .DEC_ISO    (dec_iso    ),
+    .DEC_RET    (dec_ret    ),
+    .DVDD       (           ),
+    .EVDD       (           ),
+    .VDD_AON    (           ),
+    .VSS        (           )
+`endif
   );
 
   initial
     forever
       #5 clk = ~clk;
 
-  // initial begin
-  //   repeat(10)
-  //     @(posedge clk);
-
-  //   dvi <= 1'b1;
-  //   di <= $urandom_range(0, 255);
-  //   @(posedge clk);
-  //   dvi <= 1'b0;
-  //   di <= 8'h00;
-  // end
-
   initial begin
+`ifdef PG_SIM
     $supply_on("dut.EVDD", 1.8);
     $supply_on("dut.DVDD", 1.4);
     $supply_on("dut.VDD_AON", 3.3);
     $supply_on("dut.VSS", 0);
+`endif
+
     #13 rstn = ~rstn;
+
+`ifdef POST_SYNTH
     #10us;
     enc_ps_ctrl = 1'b0;
     dec_ps_ctrl = 1'b0;
@@ -74,12 +69,17 @@ module pa_env_tb ();
     #20;
     rstn = ~rstn;
     #10us;
+`endif
+
     @(posedge clk);
     dvi <= 1'b1;
     di <= 8'hAA;
+
     @(posedge clk);
     dvi <= 1'b0;
     di <= 8'h00;
+
+`ifdef POST_SYNTH
     #10us;
     enc_ret = 1'b1;
     dec_ret = 1'b1;
@@ -108,12 +108,7 @@ module pa_env_tb ();
     // #10us;
     // $supply_off("dut.VSS");
     // $supply_off("dut.VDD");
+`endif
   end
-
-
-  // initial begin
-  //   $supply_on("inst.VDD",1.2);
-  //   $supply_on("inst.VSS",0.0);
-  // end
 
 endmodule

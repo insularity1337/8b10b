@@ -1,0 +1,5 @@
+-64bit
+-gui
+-faccess
++rwc
+-define PG_SIM

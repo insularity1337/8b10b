@@ -1,8 +1,8 @@
 module pa_env (
   input              CLK ,
   input              RSTn,
-  input              ENC_PS_CTRL,
-  input              DEC_PS_CTRL,
+  // input              ENC_PS_CTRL,
+  // input              DEC_PS_CTRL,
   // input              ENC_ISO,
   // input              ENC_RET,
   // input              DEC_ISO,

@@ -50,22 +50,22 @@ foreach p $right_hand_side_ports {
   incr i
 }
 
-set top_ports { \
-  "ENC_PS_CTRL" \
-  "ENC_ISO" \
-  "ENC_RET" \
-  "DEC_PS_CTRL" \
-  "DEC_ISO" \
-  "DEC_RET"}
+# set top_ports { \
+#   "ENC_PS_CTRL" \
+#   "ENC_ISO" \
+#   "ENC_RET" \
+#   "DEC_PS_CTRL" \
+#   "DEC_ISO" \
+#   "DEC_RET"}
 
-set i 0
-foreach p $top_ports {
-  move_port $p \
-    -x [expr 8.32 + [expr $i * 16.64]] \
-    -y 99.9 \
-    -placement_status fixed
+# set i 0
+# foreach p $top_ports {
+#   move_port $p \
+#     -x [expr 8.32 + [expr $i * 16.64]] \
+#     -y 99.9 \
+#     -placement_status fixed
 
-  incr i
-}
+#   incr i
+# }
 
 check_floorplan

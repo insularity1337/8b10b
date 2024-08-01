@@ -102,14 +102,14 @@ create_logic_port DEC_RET
 #
 load_upf \
   -scope ./enc \
-  /home/sasha/Downloads/8b10b/scripts/lp/encoder_power.upf
+  ../scripts/lp/encoder_power.upf
 
 #
 # Decoder power states
 #
 load_upf \
   -scope ./dec \
-  /home/sasha/Downloads/8b10b/scripts/lp/decoder_power.upf
+  ../scripts/lp/decoder_power.upf
 
 #
 # Environment power group
@@ -140,9 +140,9 @@ add_power_state \
 #
 # Encoder strategies
 #
-load_upf /home/sasha/Downloads/8b10b/scripts/lp/encoder_strategies.upf
+load_upf ../scripts/lp/encoder_strategies.upf
 
 #
 # Decoder strategies
 #
-load_upf /home/sasha/Downloads/8b10b/scripts/lp/decoder_strategies.upf
+load_upf ../scripts/lp/decoder_strategies.upf
