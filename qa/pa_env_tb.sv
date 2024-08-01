@@ -39,7 +39,6 @@ module pa_env_tb ();
     .EVDD       (           ),
     .VDD_AON    (           ),
     .VSS        (           )
-`endif
   );
 
   initial
@@ -47,16 +46,13 @@ module pa_env_tb ();
       #5 clk = ~clk;
 
   initial begin
-`ifdef PG_SIM
     $supply_on("dut.EVDD", 1.8);
     $supply_on("dut.DVDD", 1.4);
     $supply_on("dut.VDD_AON", 3.3);
     $supply_on("dut.VSS", 0);
-`endif
 
     #13 rstn = ~rstn;
 
-`ifdef POST_SYNTH
     #10us;
     enc_ps_ctrl = 1'b0;
     dec_ps_ctrl = 1'b0;
@@ -69,7 +65,6 @@ module pa_env_tb ();
     #20;
     rstn = ~rstn;
     #10us;
-`endif
 
     @(posedge clk);
     dvi <= 1'b1;
@@ -79,7 +74,6 @@ module pa_env_tb ();
     dvi <= 1'b0;
     di <= 8'h00;
 
-`ifdef POST_SYNTH
     #10us;
     enc_ret = 1'b1;
     dec_ret = 1'b1;
@@ -108,7 +102,6 @@ module pa_env_tb ();
     // #10us;
     // $supply_off("dut.VSS");
     // $supply_off("dut.VDD");
-`endif
   end
 
 endmodule

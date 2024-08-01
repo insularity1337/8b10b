@@ -104,3 +104,5 @@ write_snapshot \
   -innovus -tag post_synth
 
 write_sdf > pa_env.sdf
+
+q

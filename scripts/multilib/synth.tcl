@@ -101,4 +101,7 @@ check_power_structure -detail > lp.cnfrml
 
 write_snapshot \
   -directory ./innovus_import \
-  -innovus -tag post_synth
+  -innovus -tag post_synth \
+  pa_env
+
+q
