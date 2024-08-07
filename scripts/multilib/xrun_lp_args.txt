@@ -10,6 +10,7 @@
 -lps_iso_precedence_verbose
 -lps_iso_verbose
 -lps_isofilter_verbose
+-lps_lsr_off
 -lps_pam_verbose
 -lps_pst_verbose
 -lps_restore_level

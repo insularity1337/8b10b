@@ -1,12 +1,14 @@
 module pa_env (
   input              CLK ,
   input              RSTn,
-  // input              ENC_PS_CTRL,
-  // input              DEC_PS_CTRL,
-  // input              ENC_ISO,
-  // input              ENC_RET,
-  // input              DEC_ISO,
-  // input              DEC_RET,
+`ifdef BEH_SIM
+  input              ENC_PS_CTRL,
+  input              DEC_PS_CTRL,
+  input              ENC_ISO,
+  input              ENC_RET,
+  input              DEC_ISO,
+  input              DEC_RET,
+`endif
   input              DVI ,
   input              KI  ,
   input        [7:0] DI  ,
@@ -48,7 +50,9 @@ module pa_env (
   encoder_8b10b_wrapper enc (
     .CLK (CLK    ),
     .RSTn(RSTn   ),
-    // .RET (ENC_RET),
+`ifdef BEH_SIM
+    .PS_CTRL (ENC_PS_CTRL),
+`endif
     .DVI (dv_in  ),
     .K   (k_in   ),
     .DI  (r_in   ),
@@ -69,7 +73,9 @@ module pa_env (
   decoder_8b10b_wrapper dec (
     .CLK (CLK     ),
     .RSTn(RSTn    ),
-    // .RET (DEC_RET ),
+`ifdef BEH_SIM
+    .PS_CTRL (DEC_PS_CTRL),
+`endif
     .DVI (dv_int  ),
     .DI  (r_int   ),
     .DVO (dv_out  ),

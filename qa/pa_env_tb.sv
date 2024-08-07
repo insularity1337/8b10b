@@ -34,11 +34,7 @@ module pa_env_tb ();
     .ENC_ISO    (enc_iso    ),
     .ENC_RET    (enc_ret    ),
     .DEC_ISO    (dec_iso    ),
-    .DEC_RET    (dec_ret    ),
-    .DVDD       (           ),
-    .EVDD       (           ),
-    .VDD_AON    (           ),
-    .VSS        (           )
+    .DEC_RET    (dec_ret    )
   );
 
   initial

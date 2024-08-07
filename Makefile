@@ -33,4 +33,7 @@ multilib: clean
 lp: clean
 	mkdir ./synth; cd ./synth; genus -f ../scripts/lp/synth.tcl; cd ../
 
+sim: clean
+	mkdir ./sim; cd ./sim; xrun -f ../scripts/multilib/xrun_launch_args.txt -f ../scripts/multilib/xrun_lp_args.txt -f ../scripts/multilib/xrun_files.txt; cd ../
+
 .DEFAULT_GOAL := multilib

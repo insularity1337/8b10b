@@ -2,4 +2,4 @@
 -gui
 -faccess
 +rwc
--define PG_SIM
+-define BEH_SIM

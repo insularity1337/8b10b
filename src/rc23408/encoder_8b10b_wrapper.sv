@@ -1,7 +1,9 @@
 module encoder_8b10b_wrapper (
   input              CLK ,
   input              RSTn,
-  // input              RET,
+`ifdef BEH_SIM
+  input              PS_CTRL,
+`endif
   input              DVI ,
   input              K   ,
   input        [7:0] DI  ,
@@ -14,7 +16,6 @@ module encoder_8b10b_wrapper (
   encoder_8b10b encoder_core (
     .CLK  (CLK ),
     .RSTn (RSTn),
-    // .RET  (RET ),
     .DVI  (DVI ),
     .K    (K   ),
     .DI   (DI  ),
