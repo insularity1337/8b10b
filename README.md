@@ -184,3 +184,7 @@ make lp
 | VBOOST_VBOOST_OFF    | VBOOST     | VBOOST | VBOOST_OFF |
 | OFF_VBOOST_VBOOST    | VBOOST_OFF | VBOOST | VBOOST     |
 | VBOOST_VBOOST_VBOOST | VBOOST     | VBOOST | VBOOST     |
+
+## Ссылки
+1. [8B/10B Encoding and Decoding for High Speed Applications (RC23408)](https://dominoweb.draco.res.ibm.com/f2df32762a248ae685256f48006b24e6.html)
+2. [The ANSI Fibre Channel Transmission Code (RC 18855)](https://www.jedec.org/sites/default/files/docs/JESD204B.pdf])
